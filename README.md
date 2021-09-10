@@ -10,9 +10,6 @@ In order to work with the logger you'll need to set up the next env variables:
 * `ELASTIC_API_VERSION` - The version of elastic search
 * `ELASTIC_SERVICE_NAME` - The name of the service.
 
-BTW your project needs to run with typescript.
-
-
 ## Working with the package
 
 ```js
