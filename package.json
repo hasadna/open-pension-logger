@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "./lib/Logger.js",
-  "type": "module",
   "author": "",
   "license": "ISC",
   "dependencies": {
