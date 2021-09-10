@@ -1,6 +1,6 @@
-import * as elasticsearch from 'elasticsearch'
+import {Client} from 'elasticsearch'
 
-let client;
+let client: Client;
 
 type DebugLevel = "debug" | "info" | "warn" | "error" | "fatal";
 
@@ -9,7 +9,7 @@ function getESClient() {
     return client;
   }
 
-  client = new elasticsearch.Client({
+  client = new Client({
     host: process.env.ELASTIC_SEARCH_ADDRESS,
     apiVersion: process.env.ELASTIC_API_VERSION,
   });
@@ -34,7 +34,7 @@ export async function createIndex() {
           }
         }
       }
-    }, { ignore: [400] })
+    })
   } catch (e) {
     console.log(e);
   }
