@@ -1,0 +1,16 @@
+{
+  "name": "open-pension-logger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Logger.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^16.9.1",
+    "elasticsearch": "^16.7.2"
+  }
+}
