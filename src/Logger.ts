@@ -1,8 +1,12 @@
-import {Client} from 'elasticsearch'
+import {Client} from 'elasticsearch';
+import {DebugLevel, LoggerConfig} from './Types';
 
 let client: Client;
 
-type DebugLevel = "debug" | "info" | "warn" | "error" | "fatal";
+
+// Ignoring since process.env is lacking this settings.
+// @ts-ignore
+const {ELASTIC_SEARCH_ADDRESS, ELASTIC_API_VERSION, ELASTIC_SERVICE_NAME, NO_CONSOLE_LOG_INVOCATION}: LoggerConfig = process.env;
 
 function getESClient() {
   if (client) {
@@ -10,8 +14,8 @@ function getESClient() {
   }
 
   client = new Client({
-    host: process.env.ELASTIC_SEARCH_ADDRESS,
-    apiVersion: process.env.ELASTIC_API_VERSION,
+    host: ELASTIC_SEARCH_ADDRESS,
+    apiVersion: ELASTIC_API_VERSION,
   });
 
   return client;
@@ -36,6 +40,9 @@ export async function createIndex() {
       }
     })
   } catch (e) {
+    if (NO_CONSOLE_LOG_INVOCATION) {
+      return;
+    }
     console.log(e);
   }
 }
@@ -47,7 +54,7 @@ export function log(text: string, level: DebugLevel = 'info') {
   const doc = {
     text,
     level,
-    service: process.env.ELASTIC_SERVICE_NAME,
+    service: ELASTIC_SERVICE_NAME,
     time: new Date(),
   };
 
@@ -58,6 +65,10 @@ export function log(text: string, level: DebugLevel = 'info') {
       doc
     ]
   }).finally(() => {
+
+    if (NO_CONSOLE_LOG_INVOCATION) {
+      return;
+    }
     console.log(text)
   });
 }
