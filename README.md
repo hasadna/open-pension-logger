@@ -7,7 +7,6 @@ This is the repo for the open pension logger. The logger will send data to ES to
 In order to work with the logger you'll need to set up the next env variables:
 
 * `ELASTIC_SEARCH_ADDRESS` - The address of the elastic search address
-* `ELASTIC_API_VERSION` - The version of elastic search
 * `ELASTIC_SERVICE_NAME` - The name of the service
 * `NO_CONSOLE_LOG_INVOKATION` - Boolean, optional; When turned on, the `console.[log|error|warn|...]` won't invoke. Turn on in production. 
 
