@@ -1,4 +1,4 @@
-import {Client} from 'elasticsearch';
+import {Client} from '@elastic/elasticsearch';
 import {DebugLevel, LoggerConfig} from './Types';
 
 let client: Client;
@@ -6,16 +6,15 @@ let client: Client;
 
 // Ignoring since process.env is lacking this settings.
 // @ts-ignore
-const {ELASTIC_SEARCH_ADDRESS, ELASTIC_API_VERSION, ELASTIC_SERVICE_NAME, NO_CONSOLE_LOG_INVOCATION}: LoggerConfig = process.env;
+const {ELASTIC_SEARCH_ADDRESS, ELASTIC_SERVICE_NAME, NO_CONSOLE_LOG_INVOCATION}: LoggerConfig = process.env;
 
-function getESClient() {
+function getESClient(): Client {
   if (client) {
     return client;
   }
 
   client = new Client({
-    host: ELASTIC_SEARCH_ADDRESS,
-    apiVersion: ELASTIC_API_VERSION,
+    node: 'http://localhost:9200',
   });
 
   return client;
@@ -59,12 +58,13 @@ export function log(text: string, level: DebugLevel = 'info') {
   };
 
   return getESClient().bulk({
-    refresh: true,
     body: [
       { index: { _index: 'logs' } },
       doc
     ]
-  }).finally(() => {
+  })
+    .catch(e => {})
+    .finally(() => {
 
     if (NO_CONSOLE_LOG_INVOCATION) {
       return;
