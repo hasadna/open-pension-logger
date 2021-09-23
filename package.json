@@ -1,13 +1,13 @@
 {
   "name": "open-pension-logger",
   "version": "0.0.1",
-  "description": "",
+  "description": "Sending logs to coralogix",
   "main": "./lib/Logger.js",
-  "author": "",
+  "author": "RoySegall",
   "license": "ISC",
   "dependencies": {
-    "@elastic/elasticsearch": "^7.14.1",
-    "@types/node": "^16.9.1"
+    "@types/node": "^16.9.1",
+    "coralogix-logger": "^1.1.28"
   },
   "scripts": {
     "prepareDeployment": "npx tsc",

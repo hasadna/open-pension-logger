@@ -1,74 +1,38 @@
-import {Client} from '@elastic/elasticsearch';
-import {DebugLevel, LoggerConfig} from './Types';
+import Coralogix from 'coralogix-logger';
+import {DebugLevel, levels, LoggerConfig} from './Types';
 
-let client: Client;
-
+let logger: any;
 
 // Ignoring since process.env is lacking this settings.
 // @ts-ignore
-const {ELASTIC_SEARCH_ADDRESS, ELASTIC_SERVICE_NAME, NO_CONSOLE_LOG_INVOCATION}: LoggerConfig = process.env;
+const {APPLICATION_NAME, PRIVATE_KEY, SERVICE, CATEGORY, CONSOLE_LOG_INVOCATION}: LoggerConfig = process.env;
 
-function getESClient(): Client {
-  if (client) {
-    return client;
+function getLogger() {
+  if (!logger) {
+    const config = new Coralogix.LoggerConfig({
+      applicationName: APPLICATION_NAME,
+      privateKey: PRIVATE_KEY,
+      subsystemName: SERVICE,
+    });
+
+    Coralogix.CoralogixLogger.configure(config);
+    logger = new Coralogix.CoralogixLogger(CATEGORY);
   }
 
-  client = new Client({
-    node: 'http://localhost:9200',
-  });
-
-  return client;
-}
-
-/**
- * Creating the index. Should be called when the server starts.
- */
-export async function createIndex() {
-  try {
-    await getESClient().indices.create({
-      index: 'logs',
-      body: {
-        mappings: {
-          properties: {
-            text: { type: 'text' },
-            service: { type: 'text' },
-            time: { type: 'date' },
-            level: {type: 'text'}
-          }
-        }
-      }
-    })
-  } catch (e) {
-    if (NO_CONSOLE_LOG_INVOCATION) {
-      return;
-    }
-    console.log(e);
-  }
+  return logger;
 }
 
 /**
  * Inserting a document to the ES logs index.
  */
 export function log(text: string, level: DebugLevel = 'info') {
-  const doc = {
-    text,
-    level,
-    service: ELASTIC_SERVICE_NAME,
-    time: new Date(),
-  };
+  const logger = getLogger();
+  const log = {severity: levels[level], text};
+  new Coralogix.Log(log);
 
-  return getESClient().bulk({
-    body: [
-      { index: { _index: 'logs' } },
-      doc
-    ]
-  })
-    .catch(e => {})
-    .finally(() => {
+  if (CONSOLE_LOG_INVOCATION) {
+    console.log(log)
+  }
 
-    if (NO_CONSOLE_LOG_INVOCATION) {
-      return;
-    }
-    console.log(text)
-  });
+  logger.addLog(log);
 }
