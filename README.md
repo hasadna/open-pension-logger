@@ -1,14 +1,18 @@
 # Open Pension Logger
 
-This is the repo for the open pension logger. The logger will send data to ES to store events in the `logs` index.
+A simplified way to work against coralogix.
 
 ## requirements
 
 In order to work with the logger you'll need to set up the next env variables:
 
-* `ELASTIC_SEARCH_ADDRESS` - The address of the elastic search address
-* `ELASTIC_SERVICE_NAME` - The name of the service
-* `NO_CONSOLE_LOG_INVOKATION` - Boolean, optional; When turned on, the `console.[log|error|warn|...]` won't invoke. Turn on in production. 
+* `CORALOGIX_APPLICATION_NAME` - The application name - `Open Pension staging`, `Open Pension staging`. In case this is 
+* not set then the computer name will be used as the value
+* `CORALOGIX_PRIVATE_KEY` - The private key from coralogix
+* `CORALOGIX_SERVICE_NAME` - The name of the service - `backoffice`, `notification` etc .etc. 
+* `CORALOGIX_CATEGORY` - The name of the category. Optional.
+* `CONSOLE_LOG_INVOCATION` - Boolean, optional; When turned on, the `console.[log|error|warn|...]` will invoke. Don't 
+   set it in production mode.
 
 ## Working with the package
 

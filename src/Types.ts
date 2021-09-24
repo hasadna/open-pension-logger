@@ -3,10 +3,10 @@ const {debug, info, error, critical, warning, verbose} = Severity;
 
 export type DebugLevel = "debug" | "info" | "warning" | "error" | "critical" | "verbose";
 export type LoggerConfig = {
-  APPLICATION_NAME: string,
-  PRIVATE_KEY: string,
-  SERVICE: string,
-  CATEGORY: string,
+  CORALOGIX_APPLICATION_NAME: string,
+  CORALOGIX_PRIVATE_KEY: string,
+  CORALOGIX_SERVICE_NAME: string,
+  CORALOGIX_CATEGORY: string,
   CONSOLE_LOG_INVOCATION: boolean,
 };
 
@@ -17,4 +17,21 @@ export const levels: { [key: string]: Severity } = {
   'error': error,
   'critical': critical,
   'verbose': verbose,
+};
+
+export type LogData = {
+  text: any,
+  error?: any
+};
+
+export type LogProps = {
+  severity: Severity,
+  text: {
+    text: any,
+    error?: {
+      stack?: string,
+      message?: string,
+      name?: string,
+    }
+  },
 };
