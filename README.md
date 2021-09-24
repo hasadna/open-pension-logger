@@ -17,13 +17,21 @@ In order to work with the logger you'll need to set up the next env variables:
 ## Working with the package
 
 ```js
-import {createIndex, log} from "open-pension-logger";
-
-// Creating the index. This should takes place when the server starts. 
-await createIndex();
+import {log} from "open-pension-logger";
 
 // Logging the event.
-log(`This is a message`);
+log({text: 'This is a message'});
+
+// You can use a try catch like that:
+const foo = () => {
+   throw new Error('Pizza with pineappel is bad')
+};
+
+try {
+   foo();
+} catch (error) {
+   log({text: 'you do not have permissions', error}, 'error');
+}
 ```
 
 ## Development stuff
