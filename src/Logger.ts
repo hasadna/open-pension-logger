@@ -1,74 +1,69 @@
-import {Client} from '@elastic/elasticsearch';
-import {DebugLevel, LoggerConfig} from './Types';
+import Coralogix from 'coralogix-logger';
+import {DebugLevel, levels, LogData, LoggerConfig, LogProps} from './Types';
+import {hostname} from 'os';
 
-let client: Client;
+let logger: any;
 
-
-// Ignoring since process.env is lacking this settings.
-// @ts-ignore
-const {ELASTIC_SEARCH_ADDRESS, ELASTIC_SERVICE_NAME, NO_CONSOLE_LOG_INVOCATION}: LoggerConfig = process.env;
-
-function getESClient(): Client {
-  if (client) {
-    return client;
-  }
-
-  client = new Client({
-    node: 'http://localhost:9200',
-  });
-
-  return client;
+function getSettings(): LoggerConfig {
+  // Ignoring since process.env is lacking this settings.
+  // @ts-ignore
+  const {CORALOGIX_APPLICATION_NAME, CORALOGIX_PRIVATE_KEY, CORALOGIX_SERVICE_NAME, CORALOGIX_CATEGORY, CONSOLE_LOG_INVOCATION}: LoggerConfig = process.env;
+  return {CORALOGIX_APPLICATION_NAME, CORALOGIX_PRIVATE_KEY, CORALOGIX_SERVICE_NAME, CORALOGIX_CATEGORY, CONSOLE_LOG_INVOCATION};
 }
 
 /**
- * Creating the index. Should be called when the server starts.
+ * Init the logger object.
+ * 
+ * @returns The logger object.
  */
-export async function createIndex() {
-  try {
-    await getESClient().indices.create({
-      index: 'logs',
-      body: {
-        mappings: {
-          properties: {
-            text: { type: 'text' },
-            service: { type: 'text' },
-            time: { type: 'date' },
-            level: {type: 'text'}
-          }
-        }
-      }
-    })
-  } catch (e) {
-    if (NO_CONSOLE_LOG_INVOCATION) {
-      return;
-    }
-    console.log(e);
+function getLogger() {
+  let {CORALOGIX_APPLICATION_NAME, CORALOGIX_PRIVATE_KEY, CORALOGIX_SERVICE_NAME, CORALOGIX_CATEGORY}: LoggerConfig = getSettings();
+
+  if (!CORALOGIX_APPLICATION_NAME) {
+    CORALOGIX_APPLICATION_NAME = hostname();
   }
+
+  if (!logger) {
+    const config = new Coralogix.LoggerConfig({
+      applicationName: CORALOGIX_APPLICATION_NAME,
+      privateKey: CORALOGIX_PRIVATE_KEY,
+      subsystemName: CORALOGIX_SERVICE_NAME,
+    });
+
+    Coralogix.CoralogixLogger.configure(config);
+    logger = new Coralogix.CoralogixLogger(CORALOGIX_CATEGORY);
+  }
+
+  return logger;
 }
 
 /**
- * Inserting a document to the ES logs index.
+ * 
+ * @param {LogData} logData - The data to log
+ * @param {any} logData.text - The information we want to log
+ * @param {Error} logData.error - Optional; The error object
+ * @param {DebugLevel} level - The type of the log data such as info, error. Default to `info`
  */
-export function log(text: string, level: DebugLevel = 'info') {
-  const doc = {
-    text,
-    level,
-    service: ELASTIC_SERVICE_NAME,
-    time: new Date(),
-  };
+export function log({text, error}: LogData, level: DebugLevel = 'info') {
+  const [
+    {CONSOLE_LOG_INVOCATION}, logger, severity
+  ] = [getSettings(), getLogger(), levels[level]];
 
-  return getESClient().bulk({
-    body: [
-      { index: { _index: 'logs' } },
-      doc
-    ]
-  })
-    .catch(e => {})
-    .finally(() => {
+  const logProps: LogProps = {text: {text}, severity};
 
-    if (NO_CONSOLE_LOG_INVOCATION) {
-      return;
-    }
-    console.log(text)
-  });
+  if (error) {
+    logProps.text.error = {
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name
+    };
+  }
+
+  const log = new Coralogix.Log(logProps)
+
+  if (CONSOLE_LOG_INVOCATION) {
+    console.log(log)
+  }
+
+  logger.addLog(log, severity);
 }
